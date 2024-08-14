@@ -1,30 +1,12 @@
-import "dotenv/config";
+//DOESN'T WORK YET 
 import express from "express";
-import cors from "cors";
-import bodyParser from "body-parser";
-import knex from "./database_client.js";
-//import mealsRouter from "./routers/meals.js"; --cannot use it yet, but tried
+import knex from "../database_client.js";
 
-const app = express();
-app.use(cors());
-app.use(bodyParser.json());
+const mealsRouter = express.Router();
 
-const apiRouter = express.Router(); 
-
-/* FOLLOW THE EXAMPLE
-apiRouter.get("/", async (req, res) => {
-  const SHOW_TABLES_QUERY =
-    process.env.DB_CLIENT === "pg"
-      ? "SELECT * FROM pg_catalog.pg_tables;"
-      : "SHOW TABLES;";
-  const tables = await knex.raw(SHOW_TABLES_QUERY);
-  res.json({ tables });
-}); */
-
-
-apiRouter.get("/meals", async (req, res) => {
+mealsRouter.get("/", async (req, res) => {
   try { //added try/catch to handle errors & removed ternary operator from example as db client is always mysql
-    const SHOW_ALL_MEALS_QUERY = "SELECT * FROM meals ORDER BY `when` desc;";
+    const SHOW_ALL_MEALS_QUERY = "SELECT * FROM meals;"
     const [meals] = await knex.raw(SHOW_ALL_MEALS_QUERY); //meals in [] to avoid seeing metadata
     res.json(meals);
   } catch (error) {
@@ -32,8 +14,7 @@ apiRouter.get("/meals", async (req, res) => {
   }
 });
 
-
-apiRouter.get("/meals/future", async (req, res) => {
+apiRouter.get("/future", async (req, res) => {
   try {
     const SHOW_FUTURE_MEALS_QUERY = "SELECT * FROM meals WHERE `when` > NOW() ORDER BY `when` asc;";
     const [futureMeals] = await knex.raw(SHOW_FUTURE_MEALS_QUERY);
@@ -44,7 +25,7 @@ apiRouter.get("/meals/future", async (req, res) => {
 })
 
 
-apiRouter.get("/meals/past", async (req, res) => {
+apiRouter.get("/past", async (req, res) => {
   try {
     const SHOW_PAST_MEALS_QUERY = "SELECT * FROM meals WHERE `when` < NOW() ORDER BY `when` desc;";
     const [pastMeals] = await knex.raw(SHOW_PAST_MEALS_QUERY);
@@ -55,7 +36,7 @@ apiRouter.get("/meals/past", async (req, res) => {
 })
 
 
-apiRouter.get("/meals/first", async (req, res) => {
+apiRouter.get("/first", async (req, res) => {
   try {
     const SHOW_FIRST_MEAL_QUERY = "SELECT * FROM meals ORDER BY `when` asc LIMIT 1";
     const [firstMeal] = await knex.raw(SHOW_FIRST_MEAL_QUERY);
@@ -71,7 +52,7 @@ apiRouter.get("/meals/first", async (req, res) => {
   }
 })
 
-apiRouter.get("/meals/last", async (req, res) => {
+apiRouter.get("/last", async (req, res) => {
   try {
     const SHOW_LAST_MEAL_QUERY = "SELECT * FROM meals ORDER BY `when` desc LIMIT 1";
     const [lastMeal] = await knex.raw(SHOW_LAST_MEAL_QUERY);
@@ -87,9 +68,4 @@ apiRouter.get("/meals/last", async (req, res) => {
   }
 })
 
-// app.use("/meals", mealsRouter); --cannot use it yet
-app.use("/api", apiRouter); 
-
-app.listen(process.env.PORT, () => {
-  console.log(`API listening on port ${process.env.PORT}`);
-});
+export default mealsRouter;
