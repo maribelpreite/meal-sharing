@@ -8,7 +8,7 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-const apiRouter = express.Router(); 
+const apiRouter = express.Router();
 
 app.use("/api", apiRouter);
 apiRouter.use("/meals", mealsRouter);
