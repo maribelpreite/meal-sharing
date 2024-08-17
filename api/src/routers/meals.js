@@ -5,8 +5,7 @@ const mealsRouter = express.Router();
 
 mealsRouter.get("/", async (req, res) => {
   try {
-    const SHOW_ALL_MEALS_QUERY = "SELECT * FROM meals;";
-    const [meals] = await knex.raw(SHOW_ALL_MEALS_QUERY);
+    const meals = await knex("meals").select("*");
     res.json(meals);
   } catch (error) {
     res
@@ -17,9 +16,7 @@ mealsRouter.get("/", async (req, res) => {
 
 mealsRouter.get("/future", async (req, res) => {
   try {
-    const SHOW_FUTURE_MEALS_QUERY =
-      "SELECT * FROM meals WHERE `when` > NOW() ORDER BY `when` asc;";
-    const [futureMeals] = await knex.raw(SHOW_FUTURE_MEALS_QUERY);
+    const futureMeals = await knex("meals").select("*").where("when", ">", knex.fn.now()).orderBy("when", "asc");
     res.json(futureMeals);
   } catch (error) {
     res
@@ -30,9 +27,7 @@ mealsRouter.get("/future", async (req, res) => {
 
 mealsRouter.get("/past", async (req, res) => {
   try {
-    const SHOW_PAST_MEALS_QUERY =
-      "SELECT * FROM meals WHERE `when` < NOW() ORDER BY `when` desc;";
-    const [pastMeals] = await knex.raw(SHOW_PAST_MEALS_QUERY);
+    const pastMeals = await knex("meals").select("*").where("when", "<", knex.fn.now()).orderBy("when", "desc");
     res.json(pastMeals);
   } catch (error) {
     res
@@ -45,7 +40,7 @@ mealsRouter.get("/first", async (req, res) => {
   try {
     const SHOW_FIRST_MEAL_QUERY =
       "SELECT * FROM meals ORDER BY `when` asc LIMIT 1";
-    const [firstMeal] = await knex.raw(SHOW_FIRST_MEAL_QUERY);
+    const firstMeal = await knex("meals").select("*").orderBy("when", "asc").limit("1");
 
     if (firstMeal.length === 0) {
       res.status(404).json({ error: "No meals found." });
@@ -63,9 +58,7 @@ mealsRouter.get("/first", async (req, res) => {
 
 mealsRouter.get("/last", async (req, res) => {
   try {
-    const SHOW_LAST_MEAL_QUERY =
-      "SELECT * FROM meals ORDER BY `when` desc LIMIT 1";
-    const [lastMeal] = await knex.raw(SHOW_LAST_MEAL_QUERY);
+    const lastMeal = await knex("meals").select("*").orderBy("when", "desc").limit("1");
 
     if (lastMeal.length === 0) {
       res.status(404).json({ error: "No meals found." });
