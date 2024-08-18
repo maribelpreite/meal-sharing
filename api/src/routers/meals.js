@@ -88,9 +88,10 @@ mealsRouter.get("/:id", async (req, res) => {
     if (idMeal) {
       return res.json(idMeal);
     } else {
-      return res.status(404).json({error: "Please provide a valid ID number."})
+      return res
+        .status(404)
+        .json({ error: "Please provide a valid ID number." });
     }
-    
   } catch (error) {
     res
       .status(500)
@@ -98,6 +99,46 @@ mealsRouter.get("/:id", async (req, res) => {
   }
 });
 
+mealsRouter.post("/", async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      location,
+      when,
+      max_reservations,
+      price,
+      created_date,
+    } = req.body;
 
+    if (
+      !title ||
+      !description ||
+      !location ||
+      !when ||
+      !max_reservations ||
+      !price ||
+      !created_date
+    ) {
+      return res.status(400).json({ error: "Please provide all fields." });
+    }
+
+    const [newMealId] = await knex("meals").insert({
+      title,
+      description,
+      location,
+      when,
+      max_reservations,
+      price,
+      created_date,
+    });
+
+    const newMeal = await knex("meals").where("id", "=", newMealId);
+    res.status(201).json(newMeal);
+  } catch (error) {
+    console.error("Error inserting new meal:", error);
+    res.status(500).json({ error: "Error inserting new meal." });
+  }
+});
 
 export default mealsRouter;
