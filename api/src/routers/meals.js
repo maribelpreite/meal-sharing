@@ -84,7 +84,13 @@ mealsRouter.get("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
     const idMeal = await knex("meals").where("id", "=", id).first();
-    res.json(idMeal);
+
+    if (idMeal) {
+      return res.json(idMeal);
+    } else {
+      return res.status(404).json({error: "Please provide a valid ID number."})
+    }
+    
   } catch (error) {
     res
       .status(500)
