@@ -44,17 +44,15 @@ mealsRouter.get("/past", async (req, res) => {
 
 mealsRouter.get("/first", async (req, res) => {
   try {
-    const SHOW_FIRST_MEAL_QUERY =
-      "SELECT * FROM meals ORDER BY `when` asc LIMIT 1";
     const firstMeal = await knex("meals")
       .select("*")
       .orderBy("when", "asc")
-      .limit("1");
+      .first();
 
     if (firstMeal.length === 0) {
       res.status(404).json({ error: "No meals found." });
     } else {
-      res.json(firstMeal[0]);
+      res.json(firstMeal);
     }
   } catch (error) {
     res.status(500).json({
@@ -68,12 +66,12 @@ mealsRouter.get("/last", async (req, res) => {
     const lastMeal = await knex("meals")
       .select("*")
       .orderBy("when", "desc")
-      .limit("1");
+      .first();
 
     if (lastMeal.length === 0) {
       res.status(404).json({ error: "No meals found." });
     } else {
-      res.json(lastMeal[0]);
+      res.json(lastMeal);
     }
   } catch (error) {
     res
@@ -81,5 +79,19 @@ mealsRouter.get("/last", async (req, res) => {
       .json({ error: "An error ocurred while trying to fetch the last meal." });
   }
 });
+
+mealsRouter.get("/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const idMeal = await knex("meals").where("id", "=", id).first();
+    res.json(idMeal);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error ocurred while trying to fetch data." });
+  }
+});
+
+
 
 export default mealsRouter;
