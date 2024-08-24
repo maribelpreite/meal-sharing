@@ -148,12 +148,10 @@ mealsRouter.put("/:id", async (req, res) => {
     const updatedField = req.body;
 
     if (isNaN(mealId) || Object.keys(updatedField).length === 0) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Please provide both a meal ID and the fields you wish to update.",
-        });
+      return res.status(400).json({
+        error:
+          "Please provide both a meal ID and the fields you wish to update.",
+      });
     }
 
     const mealToUpdate = await knex("meals").where("id", "=", mealId).first();
@@ -178,6 +176,29 @@ mealsRouter.put("/:id", async (req, res) => {
   } catch (error) {
     console.error("Error updating meal:", error);
     res.status(500).json({ error: "Error updating meal." });
+  }
+});
+
+mealsRouter.delete("/:id", async (req, res) => {
+  try {
+    const mealId = Number(req.params.id);
+    const meal = await knex("meals").where("id", "=", mealId).first();
+
+    if (isNaN(mealId)) {
+      return res.status(400).json({ error: "Please provide a number." });
+    }
+
+    if (!meal) {
+      return res.status(404).json({ error: "Meal not found." });
+    }
+
+    await knex("meals").where("id", "=", mealId).delete();
+    res
+      .status(200)
+      .json({ success: `You have successfully deleted meal no. ${mealId}` });
+  } catch (error) {
+    console.error("Error deleting meal:", error);
+    res.status(500).json({ error: "Error deleting meal." });
   }
 });
 
