@@ -84,15 +84,17 @@ mealsRouter.get("/last", async (req, res) => {
 mealsRouter.get("/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
-    const idMeal = await knex("meals").where("id", "=", id).first();
+    const meal = await knex("meals").where("id", "=", id).first();
 
-    if (idMeal) {
-      return res.json(idMeal);
-    } else {
-      return res
-        .status(404)
-        .json({ error: "Please provide a valid ID number." });
+    if (isNaN(id)) {
+      res.status(400).json({ error: "Please provide a meal ID number." });
     }
+
+    if (!meal) {
+      res.status(404).json({ error: "Meal not found." });
+    }
+
+    res.json(meal);
   } catch (error) {
     res
       .status(500)
@@ -185,7 +187,9 @@ mealsRouter.delete("/:id", async (req, res) => {
     const meal = await knex("meals").where("id", "=", mealId).first();
 
     if (isNaN(mealId)) {
-      return res.status(400).json({ error: "Please provide a number." });
+      return res
+        .status(400)
+        .json({ error: "Please provide a meal ID number." });
     }
 
     if (!meal) {
