@@ -1,5 +1,6 @@
 import express from "express";
 import knex from "../database_client.js";
+import { getValidColumns } from "../get-valid-columns.js";
 
 const mealsRouter = express.Router();
 
@@ -133,11 +134,50 @@ mealsRouter.post("/", async (req, res) => {
       created_date,
     });
 
-    const newMeal = await knex("meals").where("id", "=", newMealId);
+    const newMeal = await knex("meals").where("id", "=", newMealId).first();
     res.status(201).json(newMeal);
   } catch (error) {
     console.error("Error inserting new meal:", error);
     res.status(500).json({ error: "Error inserting new meal." });
+  }
+});
+
+mealsRouter.put("/:id", async (req, res) => {
+  try {
+    const mealId = Number(req.params.id);
+    const updatedField = req.body;
+
+    if (isNaN(mealId) || Object.keys(updatedField).length === 0) {
+      return res
+        .status(400)
+        .json({
+          error:
+            "Please provide both a meal ID and the fields you wish to update.",
+        });
+    }
+
+    const mealToUpdate = await knex("meals").where("id", "=", mealId).first();
+    if (!mealToUpdate) {
+      return res.status(404).json({ error: "Meal not found." });
+    }
+
+    const mealsColumns = await getValidColumns("meals");
+    const invalidFields = Object.keys(updatedField).filter(
+      (key) => !mealsColumns.includes(key),
+    );
+
+    if (invalidFields.length > 0) {
+      return res
+        .status(400)
+        .json({ error: `Invalid column names: ${invalidFields}` });
+    }
+
+    await knex("meals").where("id", "=", mealId).update(updatedField);
+    const updatedMeal = await knex("meals").where("id", "=", mealId).first();
+    res.status(200).json(updatedMeal);
+  } catch (error) {
+    console.error("Error updating meal:", error);
+    res.status(500).json({ error: "Error updating meal." });
   }
 });
 
